@@ -2,9 +2,8 @@ import { useState } from "react";
 import "./App.css";
 import Login from "./components/Login";
 import { BrowserRouter ,Routes,Route,Navigate} from "react-router-dom";
-
+import Dashboard from "./components/Dashboard";
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
   
@@ -19,7 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
       </BrowserRouter>
