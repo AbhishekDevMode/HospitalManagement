@@ -1,5 +1,6 @@
 package com.example.server.entity;
 
+import com.example.server.security.CryptoConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 

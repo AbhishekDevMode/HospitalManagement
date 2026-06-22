@@ -1,7 +1,11 @@
 package com.example.server.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Entity
+@Data
+@Table(name="doctors")
 public class Doctor {
 
 

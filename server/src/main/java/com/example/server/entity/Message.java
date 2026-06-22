@@ -1,12 +1,12 @@
 package com.example.server.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-
+@Entity
+@Data
+@Table(name="messages")
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
