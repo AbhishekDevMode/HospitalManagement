@@ -1,5 +1,5 @@
 # Stage 1: Build the Spring Boot application using Java 26
-FROM maven:3.9.6-eclipse-temurin-26-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 # Copy the pom.xml and source code
