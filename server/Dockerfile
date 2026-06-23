@@ -1,23 +1,25 @@
-# Stage 1: Build the Spring Boot application using Java 26
-FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
+FROM eclipse-temurin:26-jdk-jammy AS build
 WORKDIR /app
 
-# Copy the pom.xml and source code
-COPY pom.xml .
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+
+RUN chmod +x mvnw
+
+# Copy the rest of the source code
 COPY src ./src
 
-# Build the application and skip tests for a faster deployment
-RUN mvn clean package -DskipTests
+# Build the application
+RUN ./mvnw clean package -DskipTests
 
-# Stage 2: Run the application using Java 26 JRE
-FROM eclipse-temurin:26-jre-alpine
+# --- Step 2: Run the Application ---
+FROM eclipse-temurin:26-jre-jammy
 WORKDIR /app
 
-# Copy the compiled jar from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose port 8081 as required by your app
+# Expose the default port Render uses
 EXPOSE 8081
 
-# Run the application
+# Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]
