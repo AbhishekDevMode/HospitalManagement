@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Send } from 'lucide-react';
+import axios from 'axios';
 
 export default function Chat({ appointmentId, currentUserId }) {
   const [messages, setMessages] = useState([]);
@@ -9,7 +10,14 @@ export default function Chat({ appointmentId, currentUserId }) {
   const [stompClient, setStompClient] = useState(null);
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws');
+  
+    const user = JSON.parse(localStorage.getItem('user'));
+    axios.get(`http://localhost:8081/api/messages/${appointmentId}`, {
+      headers: { Authorization: `Bearer ${user.token}` }
+    }).then(res => setMessages(res.data))
+      .catch(err => console.error(err));
+
+    const socket = new SockJS('http://localhost:8081/ws');
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {

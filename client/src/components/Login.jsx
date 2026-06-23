@@ -11,18 +11,17 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
     try {
       if (isLogin) {
-        const res = await axios.post('http://localhost:8080/api/auth/signin', {
+        const res = await axios.post('http://localhost:8081/api/auth/signin', {
           username: formData.username,
           password: formData.password
         });
         localStorage.setItem('user', JSON.stringify(res.data));
         navigate('/dashboard');
       } else {
-        await axios.post('http://localhost:8080/api/auth/signup', formData);
-        setIsLogin(true); // Switch to login after successful signup
+        await axios.post('http://localhost:8081/api/auth/signup', formData);
+        setIsLogin(true); 
         setError('Registration successful! Please login.');
       }
     } catch (err) {
@@ -35,7 +34,7 @@ export default function Login() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 transition-all">
         <div className="p-8">
           <h2 className="text-3xl font-bold text-slate-800 text-center mb-2">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isLogin ? 'LogIn' : 'Create Account'}
           </h2>
           <p className="text-center text-slate-500 mb-8">
             {isLogin ? 'Enter your credentials to access your account' : 'Sign up to get started'}
@@ -54,7 +53,7 @@ export default function Login() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
                   <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    placeholder="Type" />
+                    placeholder="Type your name" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">I am a</label>
@@ -76,7 +75,7 @@ export default function Login() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
               <input type="text" required value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})}
                 className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                placeholder="username123" />
+                placeholder="Type your username" />
             </div>
 
             <div>
