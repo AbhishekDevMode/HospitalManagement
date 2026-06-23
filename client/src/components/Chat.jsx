@@ -10,14 +10,16 @@ export default function Chat({ appointmentId, currentUserId }) {
   const [stompClient, setStompClient] = useState(null);
 
   useEffect(() => {
-  
+    // Fetch chat history
     const user = JSON.parse(localStorage.getItem('user'));
-    axios.get(`http://localhost:8081/api/messages/${appointmentId}`, {
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+    axios.get(`${API_BASE}/api/messages/${appointmentId}`, {
       headers: { Authorization: `Bearer ${user.token}` }
     }).then(res => setMessages(res.data))
       .catch(err => console.error(err));
 
-    const socket = new SockJS('http://localhost:8081/ws');
+    const WS_BASE = API_BASE.replace(/^http/, 'ws');
+    const socket = new SockJS(`${API_BASE}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {

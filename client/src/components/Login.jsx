@@ -12,17 +12,18 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
       if (isLogin) {
-        const res = await axios.post('http://localhost:8081/api/auth/signin', {
+        const res = await axios.post(`${API_BASE}/api/auth/signin`, {
           username: formData.username,
-          password: formData.password
+          password: formData.password,
         });
         localStorage.setItem('user', JSON.stringify(res.data));
         navigate('/dashboard');
       } else {
-        await axios.post('http://localhost:8081/api/auth/signup', formData);
-        setIsLogin(true); 
-        setError('Registration successful! Please login.');
+        await axios.post(`${API_BASE}/api/auth/signup`, formData);
+        setIsLogin(true);
+        setError('Registration successful! Please log in.');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');

@@ -32,7 +32,8 @@ const Dashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/api/appointments", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      const res = await axios.get(`${API_BASE}/api/appointments`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setAppointments(res.data);

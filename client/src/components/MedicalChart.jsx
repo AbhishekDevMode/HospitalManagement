@@ -13,9 +13,10 @@ export default function MedicalChart({ user, targetPatientId }) {
   const fetchChart = async () => {
     setLoading(true);
     try {
-      let url = "http://localhost:8081/api/charts/my";
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      let url = `${API_BASE}/api/charts/my`;
       if (user.role === "ROLE_DOCTOR" && targetPatientId) {
-        url = `http://localhost:8081/api/charts/patient/${targetPatientId}`;
+        url = `${API_BASE}/api/charts/patient/${targetPatientId}`;
       }
       
       const res = await axios.get(url, {
@@ -33,7 +34,8 @@ export default function MedicalChart({ user, targetPatientId }) {
     if (user.role !== "ROLE_DOCTOR" || !targetPatientId) return;
     
     try {
-      await axios.post(`http://localhost:8081/api/charts/patient/${targetPatientId}`, { history: chart.history }, {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      await axios.post(`${API_BASE}/api/charts/patient/${targetPatientId}`, { history: chart.history }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setIsEditing(false);

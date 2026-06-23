@@ -15,7 +15,8 @@ export default function PatientsList({ user }) {
   const fetchPatients = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8081/api/patients", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      const res = await axios.get(`${API_BASE}/api/patients`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setPatients(res.data);

@@ -14,7 +14,8 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
   useEffect(() => {
     if (isOpen) {
       const user = JSON.parse(localStorage.getItem("user"));
-      axios.get("http://localhost:8081/api/doctors", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      axios.get(`${API_BASE}/api/doctors`, {
         headers: { Authorization: `Bearer ${user.token}` }
       }).then(res => setDoctors(res.data))
         .catch(err => console.error(err));
@@ -31,7 +32,8 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
     const endDateTime = new Date(startDateTime.getTime() + 30 * 60000); // 30 min duration
 
     try {
-      await axios.post("http://localhost:8081/api/appointments", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      await axios.post(`${API_BASE}/api/appointments`, {
         doctorId: formData.doctorId,
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString()
