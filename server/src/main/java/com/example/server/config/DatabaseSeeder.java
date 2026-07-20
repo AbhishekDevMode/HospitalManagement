@@ -52,4 +52,5 @@ public class DatabaseSeeder implements CommandLineRunner {
         doctor.setBio(bio);
         doctorRepository.save(doctor);
     }
+
 }

@@ -8,6 +8,7 @@ import MedicalChart from "./MedicalChart";
 import PatientsList from "./PatientsList";
 
 const Dashboard = () => {
+  
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);

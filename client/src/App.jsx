@@ -12,7 +12,7 @@ function App() {
              
               <img
                 className="h-10 w-auto object-contain transition-transform duration-200 hover:scale-105"
-                src="https://media.istockphoto.com/id/1338748000/photo/green-led-cross-on-a-pharmacy-wall.jpg?s=2048x2048&w=is&k=20&c=6w4Bs-HLAhVKTbVDcpcWWZd3V_xF8646xCawPw9ckfU="
+                src=""
                 alt="Company Home"
               />
             </span>{" "}
