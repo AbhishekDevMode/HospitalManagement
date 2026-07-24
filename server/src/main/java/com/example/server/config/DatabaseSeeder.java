@@ -4,7 +4,10 @@ import com.example.server.entity.Doctor;
 import com.example.server.entity.Role;
 import com.example.server.entity.User;
 import com.example.server.repository.DoctorRepository;
+import com.example.server.entity.Department;
+import com.example.server.repository.DepartmentRepository;
 import com.example.server.repository.UserRepository;
+import com.example.server.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,10 +25,35 @@ public class DatabaseSeeder implements CommandLineRunner {
     DoctorRepository doctorRepository;
 
     @Autowired
+    DepartmentRepository departmentRepository;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
+        // Seed Admin
+        if (!userRepository.existsByUsername("admin")) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setEmail("admin@hospital.com");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setRole(Role.ROLE_ADMIN);
+            admin.setIsActive(true);
+            userRepository.save(admin);
+        }
+
+        // Seed Departments
+        if (departmentRepository.count() == 0) {
+            String[] deps = {"Cardiology", "Neurology", "Diagnostic Medicine", "Dermatology", "Pediatrics"};
+            for (String d : deps) {
+                Department dept = new Department();
+                dept.setName(d);
+                dept.setDescription(d + " department");
+                departmentRepository.save(dept);
+            }
+        }
+
         if (!userRepository.existsByUsername("drsmith")) {
             createDoctor("drsmith", "Dr. John Smith", "Cardiology", "Expert in heart diseases and cardiovascular health.");
         }
@@ -43,6 +71,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         user.setEmail(username + "@hospital.com");
         user.setPassword(passwordEncoder.encode("password123"));
         user.setRole(Role.ROLE_DOCTOR);
+        user.setIsActive(true);
         userRepository.save(user);
 
         Doctor doctor = new Doctor();
@@ -50,6 +79,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         doctor.setName(name);
         doctor.setSpecialization(specialization);
         doctor.setBio(bio);
+        doctor.setIsVerified(true);
         doctorRepository.save(doctor);
     }
 

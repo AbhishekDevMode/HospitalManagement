@@ -21,6 +21,7 @@
     "@stomp/stompjs": "^7.3.0",
     "axios": "^1.18.0",
     "clsx": "^2.1.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.21.0",
     "react-router-dom": "^7.18.0",
     "sockjs-client": "^1.6.1",

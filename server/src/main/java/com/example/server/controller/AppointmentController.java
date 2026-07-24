@@ -88,4 +88,48 @@ public class AppointmentController {
 
         return ResponseEntity.ok(new MessageResponse("Status updated"));
     }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
+        Optional<Appointment> opt = appointmentRepository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Appointment not found"));
+        }
+        
+        Appointment appointment = opt.get();
+        appointment.setStatus("CANCELLED");
+        appointmentRepository.save(appointment);
+
+        return ResponseEntity.ok(new MessageResponse("Appointment cancelled"));
+    }
+
+    @PutMapping("/{id}/reschedule")
+    public ResponseEntity<?> rescheduleAppointment(@PathVariable Long id, @RequestBody AppointmentRequest request) {
+        Optional<Appointment> opt = appointmentRepository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Appointment not found"));
+        }
+        
+        Appointment appointment = opt.get();
+        appointment.setStartTime(request.getStartTime());
+        appointment.setEndTime(request.getEndTime());
+        appointment.setStatus("RESCHEDULED");
+        appointmentRepository.save(appointment);
+
+        return ResponseEntity.ok(new MessageResponse("Appointment rescheduled"));
+    }
+
+    @PutMapping("/{id}/notes")
+    public ResponseEntity<?> updateNotes(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        Optional<Appointment> opt = appointmentRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.badRequest().body(new MessageResponse("Appointment not found"));
+        
+        Appointment appointment = opt.get();
+        if (payload.containsKey("privateNotes")) appointment.setPrivateNotes(payload.get("privateNotes"));
+        if (payload.containsKey("sharedNotes")) appointment.setSharedNotes(payload.get("sharedNotes"));
+        if (payload.containsKey("labTests")) appointment.setLabTests(payload.get("labTests"));
+        
+        appointmentRepository.save(appointment);
+        return ResponseEntity.ok(new MessageResponse("Consultation notes updated"));
+    }
 }

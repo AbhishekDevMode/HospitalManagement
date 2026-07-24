@@ -18,8 +18,13 @@ export default function Login() {
           username: formData.username,
           password: formData.password,
         });
-        localStorage.setItem('user', JSON.stringify(res.data));
-        navigate('/dashboard');
+        const user = res.data;
+        localStorage.setItem('user', JSON.stringify(user));
+        if (user.role === 'ROLE_ADMIN') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         await axios.post(`${API_BASE}/api/auth/signup`, formData);
         setIsLogin(true);

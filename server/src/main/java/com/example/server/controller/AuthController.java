@@ -56,6 +56,11 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
+        User user = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
+        if (user != null && user.getIsActive() != null && !user.getIsActive()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Account is suspended or blocked."));
+        }
+
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
         return ResponseEntity.ok(new JwtResponse(jwt,

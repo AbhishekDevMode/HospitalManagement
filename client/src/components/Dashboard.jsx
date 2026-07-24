@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Calendar, MessageSquare, LogOut, FileText, Plus } from "lucide-react";
+import { User, Calendar, MessageSquare, LogOut, FileText, Plus, Search } from "lucide-react";
 import axios from "axios";
 import BookAppointmentModal from "./BookAppointmentModal";
 import Chat from "./Chat";
 import MedicalChart from "./MedicalChart";
 import PatientsList from "./PatientsList";
+import DoctorSearch from "./DoctorSearch";
+import PatientEHR from "./PatientEHR";
+import DoctorAvailability from "./DoctorAvailability";
+import ConsultationWorkspace from "./ConsultationWorkspace";
 
 const Dashboard = () => {
   
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeWorkspaceApt, setActiveWorkspaceApt] = useState(null);
   const [activeChat, setActiveChat] = useState(null); // appointmentId
   const [activeTab, setActiveTab] = useState("appointments");
   const navigate = useNavigate();
@@ -43,6 +48,20 @@ const Dashboard = () => {
     }
   };
 
+  const cancelAppointment = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      await axios.put(`${API_BASE}/api/appointments/${id}/cancel`, {}, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      fetchAppointments();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to cancel appointment");
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login");
@@ -65,11 +84,15 @@ const Dashboard = () => {
     }
 
     if (activeTab === "appointments") {
+      const today = new Date().toLocaleDateString();
+      const todaysApts = appointments.filter(a => new Date(a.startTime).toLocaleDateString() === today);
+      const pendingApts = appointments.filter(a => new Date(a.startTime).toLocaleDateString() !== today);
+
       return (
         <>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-slate-800">
-              Appointments
+              {user.role === "ROLE_DOCTOR" ? "Patient Queue" : "Appointments"}
             </h1>
             {user.role === "ROLE_PATIENT" && (
               <button 
@@ -80,41 +103,91 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {appointments.length === 0 ? (
-              <p className="text-slate-500 col-span-full">No appointments found.</p>
-            ) : (
-              appointments.map(apt => (
-                <div key={apt.id} className="border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 group-hover:w-2 transition-all"></div>
-                  <div className="flex justify-between items-start mb-4 pl-2">
-                    <div>
-                      <p className="text-xs font-bold text-blue-600 mb-1">
-                        {new Date(apt.startTime).toLocaleString()}
-                      </p>
-                      <h4 className="font-semibold text-slate-800">
-                        {user.role === "ROLE_PATIENT" ? `Dr. ${apt.doctor.name}` : `${apt.patient.name}`}
-                      </h4>
+          {user.role === "ROLE_DOCTOR" && (
+            <div className="mb-8">
+              <h2 className="text-lg font-bold text-slate-700 mb-4 border-b pb-2">Today's Queue</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {todaysApts.length === 0 ? <p className="text-slate-500">No appointments today.</p> : null}
+                {todaysApts.map(apt => (
+                  <div key={apt.id} className="border-l-4 border-l-blue-500 border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-blue-50/30">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-xs font-bold text-blue-600 mb-1">{new Date(apt.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                        <h4 className="font-semibold text-slate-800">{apt.patient.name}</h4>
+                      </div>
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full uppercase">{apt.status}</span>
                     </div>
-                    <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2 py-1 rounded-full uppercase">
-                      {apt.status}
-                    </span>
+                    <div className="flex flex-col gap-2 mt-5">
+                      <button onClick={() => setActiveChat(apt.id)} className="w-full py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white transition-colors">Open Chat</button>
+                      <button onClick={() => setActiveWorkspaceApt(apt)} className="w-full py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 transition-colors">Consultation Workspace</button>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => setActiveChat(apt.id)}
-                    className="mt-5 w-full py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white transition-colors">
-                    Join Consultation
-                  </button>
-                </div>
-              ))
-            )}
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h2 className="text-lg font-bold text-slate-700 mb-4 border-b pb-2">
+              {user.role === "ROLE_DOCTOR" ? "Upcoming / Pending Consultations" : "Your Appointments"}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(user.role === "ROLE_DOCTOR" ? pendingApts : appointments).length === 0 ? (
+                <p className="text-slate-500 col-span-full">No appointments found.</p>
+              ) : (
+                (user.role === "ROLE_DOCTOR" ? pendingApts : appointments).map(apt => (
+                  <div key={apt.id} className="border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-slate-300 group-hover:w-2 transition-all"></div>
+                    <div className="flex justify-between items-start mb-4 pl-2">
+                      <div>
+                        <p className="text-xs font-bold text-slate-500 mb-1">
+                          {new Date(apt.startTime).toLocaleString()}
+                        </p>
+                        <h4 className="font-semibold text-slate-800">
+                          {user.role === "ROLE_PATIENT" ? `Dr. ${apt.doctor.name}` : `${apt.patient.name}`}
+                        </h4>
+                      </div>
+                      <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2 py-1 rounded-full uppercase">
+                        {apt.status}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 mt-5">
+                      <button 
+                        onClick={() => setActiveChat(apt.id)}
+                        disabled={apt.status === "CANCELLED"}
+                        className="flex-1 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Join Chat
+                      </button>
+                      {user.role === "ROLE_PATIENT" && apt.status !== "CANCELLED" && (
+                        <button 
+                          onClick={() => cancelAppointment(apt.id)}
+                          className="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors">
+                          Cancel
+                        </button>
+                      )}
+                      {user.role === "ROLE_DOCTOR" && apt.status !== "CANCELLED" && (
+                         <button onClick={() => setActiveWorkspaceApt(apt)} className="flex-1 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 transition-colors">Workspace</button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </>
       );
     }
 
     if (activeTab === "charts" && user.role === "ROLE_PATIENT") {
-      return <MedicalChart user={user} />;
+      return <PatientEHR user={user} />;
+    }
+
+    if (activeTab === "search" && user.role === "ROLE_PATIENT") {
+      return <DoctorSearch user={user} />;
+    }
+
+    if (activeTab === "availability" && user.role === "ROLE_DOCTOR") {
+      return <DoctorAvailability />;
     }
 
     if (activeTab === "patients" && user.role === "ROLE_DOCTOR") {
@@ -155,7 +228,7 @@ const Dashboard = () => {
             onClick={() => { setActiveTab("appointments"); setActiveChat(null); }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "appointments" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
             <Calendar size={20} />
-            Appointments
+            {user.role === "ROLE_DOCTOR" ? "Patient Queue" : "Appointments"}
           </button>
           <button 
             onClick={() => { setActiveTab("consultations"); setActiveChat(null); }}
@@ -164,20 +237,36 @@ const Dashboard = () => {
             Consultations
           </button>
           {user.role === "ROLE_PATIENT" && (
-            <button 
-              onClick={() => { setActiveTab("charts"); setActiveChat(null); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "charts" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
-              <FileText size={20} />
-              My Medical Chart
-            </button>
+            <>
+              <button 
+                onClick={() => { setActiveTab("search"); setActiveChat(null); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "search" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
+                <Search size={20} />
+                Find a Doctor
+              </button>
+              <button 
+                onClick={() => { setActiveTab("charts"); setActiveChat(null); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "charts" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
+                <FileText size={20} />
+                My Medical Chart
+              </button>
+            </>
           )}
           {user.role === "ROLE_DOCTOR" && (
-            <button 
-              onClick={() => { setActiveTab("patients"); setActiveChat(null); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "patients" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
-              <User size={20} />
-              Patients
-            </button>
+            <>
+              <button 
+                onClick={() => { setActiveTab("patients"); setActiveChat(null); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "patients" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
+                <User size={20} />
+                Patients
+              </button>
+              <button 
+                onClick={() => { setActiveTab("availability"); setActiveChat(null); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "availability" ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
+                <Calendar size={20} />
+                My Availability
+              </button>
+            </>
           )}
         </nav>
 
@@ -199,6 +288,13 @@ const Dashboard = () => {
         onClose={() => setIsModalOpen(false)} 
         onBooked={fetchAppointments} 
       />
+
+      {activeWorkspaceApt && (
+        <ConsultationWorkspace 
+          appointment={activeWorkspaceApt} 
+          onClose={() => setActiveWorkspaceApt(null)} 
+        />
+      )}
     </div>
   );
 };

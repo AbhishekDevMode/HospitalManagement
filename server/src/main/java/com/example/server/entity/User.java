@@ -23,4 +23,6 @@ public class User {
 
     private String email;
 
+    @Column(nullable = false)
+    private Boolean isActive = true;
 }

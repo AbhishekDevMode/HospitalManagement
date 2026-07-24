@@ -26,4 +26,13 @@ public class Appointment {
 
     private String status;
 
+    @Column(columnDefinition = "TEXT")
+    private String privateNotes;
+
+    @Column(columnDefinition = "TEXT")
+    private String sharedNotes;
+
+    @Column(columnDefinition = "TEXT")
+    private String labTests;
+
 }

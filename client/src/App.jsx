@@ -2,19 +2,23 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 
+import AdminDashboard from "./components/AdminDashboard";
+
 function App() {
-  return (
+
+  return(
+
     <BrowserRouter>
       <div className="min-h-screen bg-slate-50 font-sans">
         <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
             <span className="bg-blue-600 text-white p-1 rounded-lg">
-             
               <img
                 className="h-10 w-auto object-contain transition-transform duration-200 hover:scale-105"
                 src=""
                 alt="Company Home"
               />
+              
             </span>{" "}
             CareConnect
           </div>
@@ -24,6 +28,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </div>
     </BrowserRouter>
