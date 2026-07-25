@@ -18,10 +18,15 @@ export default function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
+
     const storedUser = localStorage.getItem('user');
+    
     if (!storedUser) {
+    
       navigate('/login');
+    
     } else {
+    
       const u = JSON.parse(storedUser);
       if (u.role !== 'ROLE_ADMIN') {
         navigate('/dashboard');
