@@ -63,6 +63,15 @@ public class DatabaseSeeder implements CommandLineRunner {
         if (!userRepository.existsByUsername("drhouse")) {
             createDoctor("drhouse", "Dr. Gregory House", "Diagnostic Medicine", "Renowned diagnostician handling complex cases.");
         }
+        if (!userRepository.existsByUsername("drjones")) {
+            createDoctor("drjones", "Dr. Emily Jones", "Cardiology", "Specializes in echocardiography and preventive cardiology.");
+        }
+        if (!userRepository.existsByUsername("drdavis")) {
+            createDoctor("drdavis", "Dr. Michael Davis", "Pediatrics", "Over 10 years of experience in pediatric care.");
+        }
+        if (!userRepository.existsByUsername("drlee")) {
+            createDoctor("drlee", "Dr. Nancy Lee", "Dermatology", "Expert in clinical dermatology and skin diseases.");
+        }
     }
 
     private void createDoctor(String username, String name, String specialization, String bio) {

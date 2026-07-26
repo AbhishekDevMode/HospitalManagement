@@ -126,7 +126,6 @@ export default function DoctorSearch({ user }) {
                 placeholder="Share your experience..."
               ></textarea>
             </div>
-
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setReviewDoctor(null)}

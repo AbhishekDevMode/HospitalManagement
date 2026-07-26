@@ -4,6 +4,7 @@ import MedicalChart from "./MedicalChart";
 import { User, ChevronRight } from "lucide-react";
 
 export default function PatientsList({ user }) {
+
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [loading, setLoading] = useState(true);
