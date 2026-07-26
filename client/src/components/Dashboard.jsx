@@ -31,7 +31,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (user && activeTab === "appointments") {
+    if (user && (activeTab === "appointments" || activeTab === "consultations")) {
       fetchAppointments();
     }
   }, [user, activeTab]);
@@ -195,11 +195,47 @@ const Dashboard = () => {
     }
 
     if (activeTab === "consultations") {
+      const pastApts = appointments.filter(a => new Date(a.startTime) < new Date() || a.status === "COMPLETED");
+      
       return (
-        <div className="text-center p-8">
-          <MessageSquare size={48} className="mx-auto text-slate-300 mb-4" />
-          <h2 className="text-xl font-bold text-slate-700">Past Consultations</h2>
-          <p className="text-slate-500 mt-2">Your past consultation history will appear here.</p>
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-slate-800">Past Consultations</h1>
+          </div>
+          {pastApts.length === 0 ? (
+            <div className="text-center p-8 border border-slate-200 rounded-xl bg-slate-50">
+              <MessageSquare size={48} className="mx-auto text-slate-300 mb-4" />
+              <h2 className="text-xl font-bold text-slate-700">No Past Consultations</h2>
+              <p className="text-slate-500 mt-2">Your consultation history will appear here.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastApts.map(apt => (
+                <div key={apt.id} className="border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-white">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-xs font-bold text-slate-500 mb-1">
+                        {new Date(apt.startTime).toLocaleString()}
+                      </p>
+                      <h4 className="font-semibold text-slate-800">
+                        {user.role === "ROLE_PATIENT" ? `Dr. ${apt.doctor.name}` : `${apt.patient.name}`}
+                      </h4>
+                    </div>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase ${apt.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
+                      {apt.status || "COMPLETED"}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 mt-5">
+                    <button 
+                      onClick={() => setActiveChat(apt.id)}
+                      className="flex-1 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white transition-colors">
+                      View Chat History
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }
