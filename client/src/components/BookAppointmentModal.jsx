@@ -10,6 +10,7 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
     date: "",
     time: ""
   });
+  
   const [error, setError] = useState("");
   const [isPaymentStep, setIsPaymentStep] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,11 +18,13 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
 
   useEffect(() => {
     if (isOpen) {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const token = user?.token || user?.accessToken;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
-      axios.get(`${API_BASE}/api/doctors`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      }).then(res => setDoctors(res.data))
+      axios.get(`${API_BASE}/api/doctors`, { headers })
+        .then(res => setDoctors(res.data))
         .catch(err => console.error(err));
     }
   }, [isOpen]);
@@ -38,11 +41,12 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
     setIsLoadingSlots(true);
     setAvailableSlots([]);
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
+      const token = user?.token || user?.accessToken;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
-      const res = await axios.get(`${API_BASE}/api/doctors/${formData.doctorId}/slots?date=${formData.date}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
+      const res = await axios.get(`${API_BASE}/api/doctors/${formData.doctorId}/slots?date=${formData.date}`, { headers });
       setAvailableSlots(res.data);
     } catch (err) {
       console.error(err);
@@ -57,7 +61,15 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
     setError("");
     setIsProcessing(true);
     
-    const user = JSON.parse(localStorage.getItem("user"));
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const token = user?.token || user?.accessToken;
+
+    if (!token) {
+      setError("Please log in to book an appointment");
+      setIsProcessing(false);
+      return;
+    }
 
     // Simulate payment processing delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -78,7 +90,7 @@ export default function BookAppointmentModal({ isOpen, onClose, onBooked }) {
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString()
       }, {
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setIsPaymentStep(false);
       onBooked();
