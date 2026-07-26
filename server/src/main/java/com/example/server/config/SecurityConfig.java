@@ -78,7 +78,7 @@ public class SecurityConfig {
                         auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/ws/**").permitAll()
-                                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/doctors/**").permitAll()
+                                .requestMatchers("/api/doctors/**", "/api/doctors").permitAll()
                                 .requestMatchers("/api/**").authenticated()
                                 .anyRequest().permitAll()
                 );

@@ -27,6 +27,7 @@ export default function DoctorSearch({ user }) {
       const res = await axios.get(`${API_BASE}/api/doctors/search?${params.toString()}`, {
         headers
       });
+      
       setDoctors(res.data);
     } catch (err) {
       console.error("Failed to fetch doctors:", err);
