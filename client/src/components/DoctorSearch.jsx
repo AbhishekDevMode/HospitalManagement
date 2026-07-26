@@ -21,12 +21,15 @@ export default function DoctorSearch({ user }) {
       if (specialization) params.append("specialization", specialization);
       if (minRating > 0) params.append("minRating", minRating);
       
+      const token = user?.token || user?.accessToken;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const res = await axios.get(`${API_BASE}/api/doctors/search?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers
       });
       setDoctors(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch doctors:", err);
     }
   };
 
@@ -34,9 +37,14 @@ export default function DoctorSearch({ user }) {
     if (!reviewDoctor) return;
     try {
       const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      const token = user?.token || user?.accessToken;
+      if (!token) {
+        alert("Please log in to submit a review");
+        return;
+      }
       await axios.post(`${API_BASE}/api/doctors/${reviewDoctor.id}/reviews`, 
         { rating, comment },
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setReviewDoctor(null);
       setComment("");
