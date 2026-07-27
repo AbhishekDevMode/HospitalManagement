@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/departments")
-@CrossOrigin(origins = "*")
 public class DepartmentController {
 
     @Autowired
