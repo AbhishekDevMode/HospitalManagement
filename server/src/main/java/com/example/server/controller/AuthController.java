@@ -47,32 +47,40 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        String username = loginRequest.getUsername() != null ? loginRequest.getUsername().trim() : "";
+        User user = userRepository.findByUsername(username).orElse(null);
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
-        if (user != null && user.getIsActive() != null && !user.getIsActive()) {
+        if (user != null && Boolean.FALSE.equals(user.getIsActive())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Account is suspended or blocked."));
         }
 
-        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, loginRequest.getPassword()));
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                null,
-                role));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+            String role = userDetails.getAuthorities().iterator().next().getAuthority();
+
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(),
+                    user != null ? user.getEmail() : null,
+                    role));
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            return ResponseEntity.status(401).body(new MessageResponse("Error: Invalid username or password!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new MessageResponse("Error: Authentication failed due to server error: " + e.getMessage()));
+        }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+        String username = signUpRequest.getUsername() != null ? signUpRequest.getUsername().trim() : "";
+        if (userRepository.existsByUsername(username)) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
@@ -80,9 +88,10 @@ public class AuthController {
 
         // Create new user's account
         User user = new User();
-        user.setUsername(signUpRequest.getUsername());
+        user.setUsername(username);
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
+        user.setIsActive(true);
 
         String reqRole = signUpRequest.getRole();
         Role role = Role.ROLE_PATIENT; // default

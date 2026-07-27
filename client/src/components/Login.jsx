@@ -11,11 +11,12 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    const cleanedUsername = formData.username.trim();
     try {
       const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
       if (isLogin) {
         const res = await axios.post(`${API_BASE}/api/auth/signin`, {
-          username: formData.username,
+          username: cleanedUsername,
           password: formData.password,
         });
         const user = res.data;
@@ -26,12 +27,21 @@ export default function Login() {
           navigate('/dashboard');
         }
       } else {
-        await axios.post(`${API_BASE}/api/auth/signup`, formData);
+        await axios.post(`${API_BASE}/api/auth/signup`, {
+          ...formData,
+          username: cleanedUsername,
+        });
         setIsLogin(true);
         setError('Registration successful! Please log in.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed');
+      if (err.response) {
+        setError(err.response.data?.message || 'Authentication failed. Please check your credentials.');
+      } else if (err.request) {
+        setError('Unable to connect to the backend server. Please check if the server is running on http://localhost:8081');
+      } else {
+        setError(err.message || 'An unexpected error occurred during authentication.');
+      }
     }
   };
 
