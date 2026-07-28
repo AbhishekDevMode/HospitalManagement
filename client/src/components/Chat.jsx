@@ -45,7 +45,7 @@ export default function Chat({ appointmentId, currentUserId }) {
         senderId: currentUserId,
         content: input,
       };
-      stompClient.publish({ destination: '/app/chat', body: JSON.stringify(msg) });
+      stompClient.publish({ destination: '/app/chat', body : JSON.stringify(msg) });
       setInput('');
     }
   };

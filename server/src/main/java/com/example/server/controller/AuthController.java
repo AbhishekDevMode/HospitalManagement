@@ -1,5 +1,4 @@
 package com.example.server.controller;
-
 import com.example.server.entity.Doctor;
 import com.example.server.entity.Patient;
 import com.example.server.entity.Role;
@@ -45,7 +44,7 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?>authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         String username = loginRequest.getUsername() != null ? loginRequest.getUsername().trim() : "";
         User user = userRepository.findByUsername(username).orElse(null);
 

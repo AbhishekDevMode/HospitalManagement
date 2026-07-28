@@ -12,8 +12,11 @@ export default function Login() {
     e.preventDefault();
     setError('');
     const cleanedUsername = formData.username.trim();
+
     try {
-      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+      // In local development Vite forwards /api requests to the Spring Boot server.
+      // Set VITE_API_BASE_URL when the frontend and backend are deployed separately.
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
       if (isLogin) {
         const res = await axios.post(`${API_BASE}/api/auth/signin`, {
           username: cleanedUsername,
