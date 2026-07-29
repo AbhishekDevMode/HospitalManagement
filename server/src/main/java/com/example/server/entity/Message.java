@@ -14,7 +14,7 @@ public class Message {
 
     private Long senderId;
     private Long receiverId;
-    private String appointmentId;
+    private Long appointmentId;
 
     @Column(columnDefinition = "TEXT")
     private String content;
