@@ -23,7 +23,6 @@ export default function Chat({ appointmentId, currentUserId }) {
     const client = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
-        console.log('Connected to chat');
         client.subscribe(`/topic/appointment/${appointmentId}`, (msg) => {
           const newMsg = JSON.parse(msg.body);
           setMessages((prev) => [...prev, newMsg]);
