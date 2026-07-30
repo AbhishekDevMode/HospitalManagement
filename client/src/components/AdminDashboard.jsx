@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 
 export default function AdminDashboard() {
+  
   const [activeTab, setActiveTab] = useState('analytics');
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
